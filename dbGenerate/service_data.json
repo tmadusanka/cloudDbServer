@@ -1,0 +1,18 @@
+{
+    "services" : [
+        {
+            "id" : "s1111",
+            "vendorId" : "v1111",
+            "name" : "pizza1", 
+            "description" : "testing", 
+            "price" : "1050"
+        },
+        {
+            "id" : "s2222",
+            "vendorId" : "v2222",
+            "name" : "pizza2", 
+            "description" : "testing", 
+            "price" : "2250"
+        }
+    ]
+}

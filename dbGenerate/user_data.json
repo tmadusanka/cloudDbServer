@@ -1,0 +1,40 @@
+{
+    "users" : [
+        {
+            "id" : "ca1111",
+            "type" : "company_admin",
+            "email" : "email@ca1.com",
+            "password" : "ca1234"
+        },
+        {
+            "id" : "ca2222",
+            "type" : "company_admin",
+            "email" : "email@ca2.com",
+            "password" : "ca1234"
+        },
+        {
+            "id" : "va1111",
+            "type" : "vendor",
+            "email" : "email@va1.com",
+            "password" : "v1234"
+        },
+        {
+            "id" : "va2222",
+            "type" : "vendor",
+            "email" : "email@va2.com",
+            "password" : "v1234"
+        },
+        {
+            "id" : "e1111" ,
+            "type" : "employee",
+            "email" : "email@e1.com",
+            "password" : "e1234"
+        },
+        {
+            "id" : "e2222" ,
+            "type" : "employee",
+            "email" : "email@e2.com",
+            "password" : "e1234"
+        }
+    ]
+}

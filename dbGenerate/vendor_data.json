@@ -1,0 +1,20 @@
+{
+    "vendors" : [
+        {
+            "id" : "v1111",
+            "name" : "Pizza Hut",
+            "email" : "email@PizzaHut.com",
+            "contact" : "01122334455",
+            "serviceList" : [ "s1111" ],
+            "adminList" : [ "va1111" ]
+        },
+        {
+            "id" : "v2222",
+            "name" : "Dominos",
+            "email" : "email@Dominos.com",
+            "contact" : "01122334455",
+            "serviceList" : [ "s2222" ],
+            "adminList" : [ "va2222" ]
+        }
+    ]
+}

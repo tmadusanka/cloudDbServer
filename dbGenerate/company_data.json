@@ -1,0 +1,22 @@
+{
+    "companies" : [
+        {
+            "id" : "c1111",
+            "name" : "ABCD",
+            "email" : "email@abc.com",
+            "contact" : "071223344",
+            "vendorList" : [ "v1111" ],
+            "adminList" : ["ca1111" ],
+            "employeeList" : ["e1111"]
+        },
+        {
+            "id" : "c2222",
+            "name" : "LLMM",
+            "email" : "email@lmm.com",
+            "contact" : "0712249900",
+            "vendorList" : [ "v1111" , "v2222"],
+            "adminList" : ["ca2222" ],
+            "employeeList" : ["e2222"]
+        }
+    ]
+}
