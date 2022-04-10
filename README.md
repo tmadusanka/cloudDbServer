@@ -13,7 +13,7 @@
 
 # Generate initail database 
 - cd dbGenrate 
-- python genDb.py 
+- python genDb.py ( this will clean existing database )
 
 # Test 
 - py.test testWeb.py
