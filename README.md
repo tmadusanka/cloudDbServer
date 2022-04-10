@@ -4,9 +4,9 @@
 - py -m venv env 
 - env\Scripts\activate
 
--pip install flask 
--pip install firebase_admin 
--pip install requests 
+- pip install flask 
+- pip install firebase_admin 
+- pip install requests 
 
 # Run server 
 - python app.py
