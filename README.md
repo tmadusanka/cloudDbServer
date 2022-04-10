@@ -15,5 +15,7 @@
 - cd dbGenrate 
 - python genDb.py ( this will clean existing database )
 
-# Test 
+# Test
+- pip install pytest
+
 - py.test testWeb.py
