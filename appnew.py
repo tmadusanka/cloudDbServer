@@ -2,16 +2,23 @@ import os
 import random
 import string
 import datetime
+
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email
+from python_http_client.exceptions import HTTPError
+
 from flask import Flask, request, jsonify
 from firebase_admin import credentials, firestore, initialize_app
 from flask_cors import CORS
+
+#sg = sendgrid.SendGridClient("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")
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Initialize Firestore DB
-cred = credentials.Certificate('newkey.json')
+cred = credentials.Certificate('key.json')
 default_app = initialize_app(cred)
 db = firestore.client()
 
@@ -22,6 +29,7 @@ service_ref = db.collection('service')
 order_ref = db.collection('order')
 token_ref = db.collection('token')
 
+############################################################################################
 ############################################################################################
 def getRandomKey():
     letters = string.ascii_letters
@@ -130,6 +138,54 @@ def validateRequest(jsn , argList):
             return msg
 
     return msg
+
+def sendMali(orderId, customerEmail , customerName, CustomerContact, orderDetails, vendorEmail ):
+    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    
+    header = "New Order " + orderId 
+    html_content =  "<html> \
+                <style>\
+                table, th, td {\
+                border:1px solid black;\
+                }\
+                </style>\
+                <body>\
+                <h2>New Order</h2>\
+                <table style=\"width:100%\">\
+                <tr>\
+                    <td>Order ID</td>\
+                    <td>"+ orderId + "</td>\
+                </tr>\
+                <tr>\
+                    <td>Customer Name</td>\
+                    <td>" + customerName +"</td>\
+                </tr>\
+                    <tr>\
+                    <td>Customer Contact</td>\
+                    <td>" +  CustomerContact + "</td>\
+                </tr>\
+                    <tr>\
+                    <td>Vendor</td>\
+                    <td>" + vendorEmail + "</td>\
+                </tr>\
+                    <tr>\
+                    <td>Order details</td>\
+                    <td>" + orderDetails + "</td>\
+                </tr>\
+                </table>\
+                <p>Thank you</p>\
+                </body>\
+                </html>"
+
+    message = Mail(
+        to_emails="pvtmadusanka29@gmail.com",
+        from_email=Email('synergyco111@gmail.com', "synergyco"),
+        subject=header,
+        html_content=html_content
+        )
+    #message.add_bcc("[YOUR]@gmail.com")
+    response = sg.send(message)
+
 #####################################################################################
 
 @app.route('/login', methods=['POST'])
@@ -193,6 +249,80 @@ def signup():
 
         if type == "vendor" :
             vendor_ref.add({'name' : company , 'email' : username})
+
+        return jsonify({"success": True}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
+@app.route('/getEmployeeList', methods=['POST'])
+def getEmployeeList():
+    """
+        Get employee list in company
+        input json={'token': toke }
+        output jason={'success': true , "employeeList" : vendor_list}
+    """
+    try:
+        msg = validateRequest(request.json , ["token"])
+        if(msg != "OK"):
+            return jsonify({"success": False, "msg" : msg}), 400
+
+        #get token from request 
+        token = request.json['token']
+
+        #get username from token 
+        tokendata = getTokenData(token)
+        if bool(tokendata) == False :
+            return jsonify({"success": False , "msg" : "invalid token"}), 400
+
+        username = tokendata["username"]
+        #get company from  username 
+        userdata = find_one(users_ref, "username" , username , "==")
+        if bool(userdata) == False:
+            return jsonify({"success": False , "msg" : "invalid user"}), 400
+        company = userdata['company']
+
+        docs = find_all(users_ref, "name" , company , "==")
+        employeeList = []
+        for doc in docs :
+            if doc["type"] == "emplyee" :
+                employeeList.append(doc["username"])    
+
+        return jsonify({"success": True, "employeeList" : employeeList}), 200
+    except Exception as e:
+        return f"An Error Occured: {e}"
+
+@app.route('/removeEmployee', methods=['POST'])
+def removeEmployee():
+    """
+        Remove employee in company
+        input json={'token': toke , "emplyee" : username }
+        output jason={'success': true }
+    """
+    try:
+        msg = validateRequest(request.json , ["token" , "employee"])
+        if(msg != "OK"):
+            return jsonify({"success": False, "msg" : msg}), 400
+
+        #get token from request 
+        token = request.json['token']
+        employee = request.jason['employee']
+
+        #get username from token 
+        tokendata = getTokenData(token)
+        if bool(tokendata) == False :
+            return jsonify({"success": False , "msg" : "invalid token"}), 400
+
+        username = tokendata["username"]
+        #get company from  username 
+        userdata = find_one(users_ref, "username" , username , "==")
+        if bool(userdata) == False:
+            return jsonify({"success": False , "msg" : "invalid user"}), 400
+        company = userdata['company']
+
+        doc = find_one(users_ref, "username" , employee , "==" )
+        if doc :
+            if doc["type"] == "employee" and doc["company"] == company :
+                delete_all(users_ref,"username" , employee , "==")
 
         return jsonify({"success": True}), 200
     except Exception as e:
@@ -390,8 +520,9 @@ def addOrder():
             return jsonify({"success": False , "msg" : "invalid user"}), 400
         company = userdata['company']
 
+        orderId = getRandomKey()
         order = {
-            "id" : getRandomKey(),
+            "id" : orderId,
             "timestamp" : datetime.datetime.now(),
             "username" : username,
             "customerName" : request.json['customerName'],
@@ -403,6 +534,9 @@ def addOrder():
             "status" : "new"
         }
         order_ref.add(order)
+
+        sendMali(orderId, request.json['email'],  request.json['customerName'], request.json['contact'], request.json['details'], vendor)
+
         return jsonify({"success": True}), 200
 
     except Exception as e:
@@ -583,7 +717,10 @@ def getOrdersStat():
     except Exception as e:
         return f"An Error Occured: {e}"
 
+@app.route('/')
+def rrr():
+    return "SynergyCo web service"
 
-if __name__ == "__main__":
-    app.run(debug=True)
-
+port = int(os.environ.get('PORT', 8080))
+if __name__ == '__main__':
+    app.run(threaded=True, host='0.0.0.0', port=port)
